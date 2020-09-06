@@ -1,0 +1,49 @@
+version: '3.5'
+
+services:
+    #######################################
+    # Merchant Service
+    #######################################
+    merchant-service:
+        container_name: merchant-service
+        env_file: "env/${ENV}.env"
+        build:
+            context: "."
+        image: merchant-service
+        depends_on:
+        - db_merchant
+        networks:
+        - lms-net
+        ports:
+        - "4015:4015"
+        volumes:
+        - "mer_node_volume:/home/app/node_modules"
+        restart: unless-stopped
+
+    #######################################
+    # database
+    #######################################
+    db_merchant:
+        container_name: db_merchant
+        env_file: "env/${ENV}.env"
+        image: postgres:9.6
+        volumes:
+            - "merchant_db_volume:/var/lib/postgresql/data"
+        ports:
+            - "4016:5432"
+        networks:
+            - lms-net
+        restart: unless-stopped
+
+networks:
+        lms-net:
+            name: lms-network
+            ipam:
+                driver: default
+                config:
+                    - subnet: "172.16.238.0/24"
+                    - subnet: "2001:3984:3989::/64"
+
+volumes:
+    mer_node_volume:
+    merchant_db_volume:
